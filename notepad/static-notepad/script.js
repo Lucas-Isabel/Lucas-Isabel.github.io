@@ -1,10 +1,8 @@
 const editor = document.getElementById("editor");
 const status = document.getElementById("status");
 
-// Extrai ID da URL (ex: /notepad/joaokkk -> "joaokkk")
 const id = location.pathname.split("/").pop();
 
-// Backend fictício para salvar e carregar
 const API_URL = `https://seuservidor.com/api/notepad/${id}`;
 
 async function loadContent() {
