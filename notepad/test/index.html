@@ -17,7 +17,7 @@
 
   <script>
     async function loadTemplate() {
-      const URL = "https:/Lucas-Isabel.github.io/notepad/static-notepad"
+      let URL = "https://Lucas-Isabel.github.io/notepad/static-notepad"
       const html = await fetch( URL +"/index.html")
         .then(res => res.text());
 
