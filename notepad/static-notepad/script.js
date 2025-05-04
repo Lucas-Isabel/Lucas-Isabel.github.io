@@ -12,10 +12,10 @@ async function loadContent() {
     const res = await fetch(API_URL);
     if (!res.ok) throw new Error("Erro ao carregar");
     const json = await res.json();
-    editor.value = json.content || "";
+    editor.value = json.content || "default value";
   } catch (e) {
     console.error(e);
-    editor.value = "default value ...";
+    editor.value = "default error value ..." + e;
   }
 }
 
