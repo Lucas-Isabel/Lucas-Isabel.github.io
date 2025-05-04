@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>João - Bloco de Notas</title>
+  <style>
+    #dynamic-container {
+      min-height: 400px;
+      border: 1px dashed #aaa;
+      padding: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Bloco de Notas - João</h1>
+  <div id="dynamic-container">Carregando bloco de notas...</div>
+
+  <script>
+    async function loadTemplate() {
+      const URL = "https:/Lucas-Isabel.github.io/notepad/static-notepad"
+      const html = await fetch( URL +"/index.html")
+        .then(res => res.text());
+
+      // Cria um DOM temporário para extrair só o conteúdo do body
+      const temp = document.createElement("div");
+      temp.innerHTML = html;
+
+      // Pega só o body do template
+      const templateBody = temp.querySelector("body").innerHTML;
+      document.getElementById("dynamic-container").innerHTML = templateBody;
+
+      // Adiciona o CSS
+      const css = document.createElement("link");
+      css.rel = "stylesheet";
+      css.href = URL+"/style.css";
+      document.head.appendChild(css);
+
+      // Executa o JS do template
+      const script = document.createElement("script");
+      script.src = URL+"/script.js";
+      document.body.appendChild(script);
+    }
+
+    loadTemplate();
+  </script>
+</body>
+</html>
