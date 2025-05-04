@@ -8,6 +8,7 @@ const API_URL = `https://seuservidor.com/api/notepad/${id}`;
 async function loadContent() {
   try {
     document.querySelector("textarea").disabled = true;
+    editor.value = "loading ..."
     const res = await fetch(API_URL);
     if (!res.ok) throw new Error("Erro ao carregar");
     document.querySelector("textarea").disabled = false
