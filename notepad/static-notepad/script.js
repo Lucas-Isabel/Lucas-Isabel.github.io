@@ -1,7 +1,8 @@
 const editor = document.getElementById("editor");
 const status = document.getElementById("status");
 
-const id = location.pathname.split("/").pop();
+const pathList = location.pathname.split("/");
+const id = pathList.pop();
 
 const API_URL = `https://seuservidor.com/api/notepad/${id}`;
 
