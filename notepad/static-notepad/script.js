@@ -7,8 +7,10 @@ const API_URL = `https://seuservidor.com/api/notepad/${id}`;
 
 async function loadContent() {
   try {
+    document.querySelector("textarea").disabled = true;
     const res = await fetch(API_URL);
     if (!res.ok) throw new Error("Erro ao carregar");
+    document.querySelector("textarea").disabled = false
     const json = await res.json();
     editor.value = json.content || "default value";
   } catch (e) {
