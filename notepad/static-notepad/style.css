@@ -1,0 +1,27 @@
+body {
+  font-family: sans-serif;
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+  background: #f9f9f9;
+}
+
+#container {
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+}
+
+#editor {
+  height: 300px;
+  padding: 1rem;
+  font-size: 1rem;
+  resize: vertical;
+}
+
+#status {
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  color: #888;
+}
