@@ -15,7 +15,7 @@ async function loadContent() {
     editor.value = json.content || "";
   } catch (e) {
     console.error(e);
-    editor.value = "";
+    editor.value = "default value ...";
   }
 }
 
