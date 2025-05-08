@@ -10,6 +10,7 @@ async function loadContent() {
   try {
     document.querySelector("textarea").disabled = true;
     editor.value = "loading ..."
+    console.log("API_URL:", API_URL);
     const res = await fetch(API_URL);
     console.log("res.status:", res.status);
     const text = await res.text();
