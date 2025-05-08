@@ -24,3 +24,9 @@ body {
   margin-top: 0.5rem;
   color: #888;
 }
+
+#dynamic-container {
+  width: 80vw;
+  display: flex;
+  flex-direction: column;
+}
