@@ -4,7 +4,7 @@ const status = document.getElementById("status");
 const pathList = location.pathname.split("/").filter(p => p !== "");
 const id = pathList.pop();
 
-const API_URL = `https://localhost:3009/api/notepad/${id}`;
+const API_URL = `http://localhost:3009/api/notepad/${id}`;
 
 async function loadContent() {
   try {
