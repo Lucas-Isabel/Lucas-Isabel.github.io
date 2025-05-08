@@ -4,7 +4,7 @@ const status = document.getElementById("status");
 const pathList = location.pathname.split("/").filter(p => p !== "");
 const id = pathList.pop();
 
-const API_URL = `http://localhost:3009/api/notepad/${id}`;
+const API_URL = `https://5b2b-2804-14d-3291-5666-f08a-5e11-ce03-54a0.ngrok-free.app/api/notepad/${id}`;
 
 async function loadContent() {
   try {
