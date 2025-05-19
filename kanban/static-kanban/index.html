@@ -1,8 +1,23 @@
-<div id="container">
+<div id="container" style="font-family: Arial, sans-serif; padding: 20px;">
   <h1>Kanban Board</h1>
   <div>
-    <button onclick="addColumn()">+ Adicionar Coluna</button>
     <button onclick="saveBoard()">💾 Salvar</button>
   </div>
-  <div id="board" style="display: flex; gap: 16px; margin-top: 20px;"></div>
+  <div id="board" style="display: flex; gap: 20px; margin-top: 20px;">
+    <div class="column" data-id="todo" style="flex: 1; background: #f9f9f9; padding: 10px; border-radius: 4px;">
+      <h2>TO DO</h2>
+      <div class="cards"></div>
+      <button onclick="addCard('todo')">+ Adicionar Cartão</button>
+    </div>
+    <div class="column" data-id="inprogress" style="flex: 1; background: #f0f4ff; padding: 10px; border-radius: 4px;">
+      <h2>IN PROGRESS</h2>
+      <div class="cards"></div>
+      <button onclick="addCard('inprogress')">+ Adicionar Cartão</button>
+    </div>
+    <div class="column" data-id="done" style="flex: 1; background: #e0ffe0; padding: 10px; border-radius: 4px;">
+      <h2>DONE</h2>
+      <div class="cards"></div>
+      <button onclick="addCard('done')">+ Adicionar Cartão</button>
+    </div>
+  </div>
 </div>
