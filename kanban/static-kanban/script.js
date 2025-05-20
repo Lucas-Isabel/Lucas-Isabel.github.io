@@ -122,6 +122,66 @@ try {
 
   board.loadData(data);
 
+
+
+  document.querySelectorAll(".column").forEach(col => {
+
+    col.addEventListener("dragover", (e) => {
+
+      e.preventDefault();
+
+      col.style.backgroundColor = "#e0e7ff";
+
+    });
+
+  
+
+    col.addEventListener("dragleave", () => {
+
+      col.style.backgroundColor = "";
+
+    });
+
+  
+
+    col.addEventListener("drop", (e) => {
+
+      e.preventDefault();
+
+      col.style.backgroundColor = "";
+
+  
+
+      const data = JSON.parse(e.dataTransfer.getData("text/plain"));
+
+      const fromCol = board.getColumn(data.fromColumnId);
+
+      const toColId = col.closest(".column").dataset.id;
+
+      const toCol = board.getColumn(toColId);
+
+  
+
+      const cardIndex = fromCol.cards.findIndex(c => c.id === data.cardId);
+
+      if (cardIndex !== -1) {
+
+        const [movedCard] = fromCol.cards.splice(cardIndex, 1);
+
+        toCol.cards.push(movedCard);
+
+        renderBoard();
+
+        saveBoard();
+
+      }
+
+    });
+
+  });
+
+
+
   renderBoard();
 
 } catch (err) {
@@ -150,6 +210,66 @@ for (const column of board.columns) {
 
 
 
+// === drag and drop bindings ===
+
+document.querySelectorAll(".column").forEach(col => {
+
+  col.addEventListener("dragover", (e) => {
+
+    e.preventDefault();
+
+    col.style.backgroundColor = "#e0e7ff";
+
+  });
+
+
+
+  col.addEventListener("dragleave", () => {
+
+    col.style.backgroundColor = "";
+
+  });
+
+
+
+  col.addEventListener("drop", (e) => {
+
+    e.preventDefault();
+
+    col.style.backgroundColor = "";
+
+
+
+    const data = JSON.parse(e.dataTransfer.getData("text/plain"));
+
+    const fromCol = board.getColumn(data.fromColumnId);
+
+    const toColId = col.closest(".column").dataset.id;
+
+    const toCol = board.getColumn(toColId);
+
+
+
+    const cardIndex = fromCol.cards.findIndex(c => c.id === data.cardId);
+
+    if (cardIndex !== -1) {
+
+      const [movedCard] = fromCol.cards.splice(cardIndex, 1);
+
+      toCol.cards.push(movedCard);
+
+      renderBoard();
+
+      saveBoard();
+
+    }
+
+  });
+
+});
+
+}
+
 function GenerateCard(card, colDiv) {
 
   const cardEl = document.createElement("div");
@@ -158,7 +278,41 @@ function GenerateCard(card, colDiv) {
 
   cardEl.id = card.id;
 
+  cardEl.draggable = true;
 
+
+
+  // Eventos de drag
+
+  cardEl.addEventListener("dragstart", (e) => {
+
+    e.dataTransfer.setData("text/plain", JSON.stringify({
+
+      cardId: card.id,
+
+      fromColumnId: colDiv.closest(".column").dataset.id
+
+    }));
+
+    setTimeout(() => {
+
+      cardEl.style.display = "none";
+
+    }, 0);
+
+  });
+
+
+
+  cardEl.addEventListener("dragend", () => {
+
+    cardEl.style.display = "block";
+
+  });
+
+
+
+  // Conteúdo
 
   const titleEl = document.createElement("h3");
 
@@ -190,15 +344,13 @@ function GenerateCard(card, colDiv) {
 
   cardEl.appendChild(priorityEl);
 
-  cardEl.appendChild(document.createElement("br")); // quebra de linha
+  cardEl.appendChild(document.createElement("br"));
 
   cardEl.appendChild(hardestEl);
 
 
 
   colDiv.appendChild(cardEl);
-
-}
 
 }
 
@@ -335,6 +487,12 @@ modal.querySelector("#confirm-add").onclick = () => {
   hardest);
 
   board.getColumn(columnId).addCard(newCard);
+
+
+
+
+
+
 
   renderBoard();
 
