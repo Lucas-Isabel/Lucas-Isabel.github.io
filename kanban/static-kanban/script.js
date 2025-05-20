@@ -108,7 +108,7 @@ toJSON() {
 
 const boardName = window.location.pathname.split("/").pop();
 
-const apiUrl = /api/kanban/${boardName};
+const apiUrl = `/api/kanban/${boardName}`;
 
 const board = new Board(boardName);
 
