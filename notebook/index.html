@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Notebook com Variáveis ao Vivo</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 1em;
+      background: #f4f4f4;
+    }
+    .cell {
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 1em;
+      margin-bottom: 1em;
+      border-radius: 6px;
+    }
+    .output {
+      margin-top: 1em;
+      background: #eef;
+      padding: 0.5em;
+      white-space: pre-wrap;
+    }
+    textarea {
+      width: 100%;
+      height: 60px;
+      font-family: monospace;
+      margin-bottom: 0.5em;
+    }
+    .btn {
+      margin-right: 0.5em;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+    }
+    .btn:hover {
+      background-color: #0056b3;
+    }
+    input {
+      padding: 4px;
+      font-size: 14px;
+      margin: 0 4px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Notebook com Variáveis ao Vivo</h2>
+  <div id="cells"></div>
+  <button class="btn" onclick="addCell()">Nova Célula</button>
+
+  <script>
+    const variables = {};
+    const variableInputs = {}; // mantém referência aos inputs
+
+    function addCell() {
+      const container = document.createElement('div');
+      container.className = 'cell';
+
+      const textarea = document.createElement('textarea');
+      const execBtn = document.createElement('button');
+      const renderBtn = document.createElement('button');
+      const output = document.createElement('div');
+
+      execBtn.className = renderBtn.className = 'btn';
+      execBtn.textContent = 'Executar';
+      renderBtn.textContent = 'Renderizar';
+
+      output.className = 'output';
+
+      execBtn.onclick = () => {
+        const raw = textarea.value;
+        output.textContent = parseText(raw);
+      };
+
+      renderBtn.onclick = () => {
+  const raw = textarea.value;
+  output.innerHTML = ''; // Limpa
+  output.appendChild(parseHTML(raw)); // Insere os elementos reais
+};
+
+
+      container.appendChild(textarea);
+      container.appendChild(execBtn);
+      container.appendChild(renderBtn);
+      container.appendChild(output);
+      document.getElementById('cells').appendChild(container);
+    }
+
+    function parseText(text) {
+      return text.replace(/@(\w+)/g, (_, varName) => {
+        return variables[varName] ?? `[${varName} indefinido]`;
+      });
+    }
+
+    function parseHTML(text) {
+  const fragment = document.createDocumentFragment();
+
+  let lastIndex = 0;
+  const regex = /@(\w+)/g;
+  let match;
+
+  while ((match = regex.exec(text)) !== null) {
+    const varName = match[1];
+
+    // Adiciona o texto antes do @variavel
+    fragment.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
+
+    // Cria input se ainda não existir
+    if (!variableInputs[varName]) {
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.placeholder = varName;
+      input.value = variables[varName] ?? '';
+      input.oninput = () => {
+        variables[varName] = input.value;
+        console.log(varName, input.value);
+        
+      };
+      variableInputs[varName] = input;
+    }
+
+    fragment.appendChild(variableInputs[varName]);
+    lastIndex = regex.lastIndex;
+  }
+
+  // Texto restante após última variável
+  fragment.appendChild(document.createTextNode(text.slice(lastIndex)));
+
+  return fragment;
+}
+
+
+
+    function updateAllTextOutputs() {
+      document.querySelectorAll('.cell').forEach(cell => {
+        const textarea = cell.querySelector('textarea');
+        const output = cell.querySelector('.output');
+        if (output && textarea && output.innerHTML === output.textContent) {
+          output.textContent = parseText(textarea.value);
+        }
+      });
+    }
+
+    // Célula inicial
+    window.onload = addCell;
+  </script>
+</body>
+</html>
