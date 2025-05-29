@@ -57,38 +57,49 @@
     const variableInputs = {}; // mantém referência aos inputs
 
     function addCell() {
-      const container = document.createElement('div');
-      container.className = 'cell';
+  const container = document.createElement('div');
+  container.className = 'cell';
 
-      const textarea = document.createElement('textarea');
-      const execBtn = document.createElement('button');
-      const renderBtn = document.createElement('button');
-      const output = document.createElement('div');
+  const textarea = document.createElement('textarea');
+  const execBtn = document.createElement('button');
+  const copyBtn = document.createElement('button');
+  const renderBtn = document.createElement('button');
+  const output = document.createElement('div');
 
-      execBtn.className = renderBtn.className = 'btn';
-      execBtn.textContent = 'Executar';
-      renderBtn.textContent = 'Renderizar';
+  execBtn.className = renderBtn.className = copyBtn.className = 'btn';
+  execBtn.textContent = 'Executar';
+  renderBtn.textContent = 'Renderizar';
+  copyBtn.textContent = 'Copiar';
 
-      output.className = 'output';
+  output.className = 'output';
 
-      execBtn.onclick = () => {
-        const raw = textarea.value;
-        output.textContent = parseText(raw);
-      };
+  execBtn.onclick = () => {
+    const raw = textarea.value;
+    output.textContent = parseText(raw);
+  };
 
-      renderBtn.onclick = () => {
-  const raw = textarea.value;
-  output.innerHTML = ''; // Limpa
-  output.appendChild(parseHTML(raw)); // Insere os elementos reais
-};
-
-
-      container.appendChild(textarea);
-      container.appendChild(execBtn);
-      container.appendChild(renderBtn);
-      container.appendChild(output);
-      document.getElementById('cells').appendChild(container);
+  copyBtn.onclick = () => {
+    const text = output.textContent;
+    if (text) {
+      navigator.clipboard.writeText(text)
+        .then(() => alert('Texto copiado!'))
+        .catch(err => alert('Erro ao copiar: ' + err));
     }
+  };
+
+  renderBtn.onclick = () => {
+    const raw = textarea.value;
+    output.innerHTML = ''; // Limpa
+    output.appendChild(parseHTML(raw)); // Insere os elementos reais
+  };
+
+  container.appendChild(textarea);
+  container.appendChild(execBtn);
+  container.appendChild(copyBtn);
+  container.appendChild(renderBtn);
+  container.appendChild(output);
+  document.getElementById('cells').appendChild(container);
+}
 
     function parseText(text) {
       return text.replace(/@(\w+)/g, (_, varName) => {
