@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
   <meta charset="UTF-8">
   <title>Notebook com Variáveis ao Vivo</title>
@@ -9,6 +10,7 @@
       padding: 1em;
       background: #f4f4f4;
     }
+
     .cell {
       background: #fff;
       border: 1px solid #ccc;
@@ -16,18 +18,21 @@
       margin-bottom: 1em;
       border-radius: 6px;
     }
+
     .output {
       margin-top: 1em;
       background: #eef;
       padding: 0.5em;
       white-space: pre-wrap;
     }
+
     textarea {
       width: 100%;
       height: 60px;
       font-family: monospace;
       margin-bottom: 0.5em;
     }
+
     .btn {
       margin-right: 0.5em;
       padding: 6px 12px;
@@ -37,9 +42,11 @@
       color: white;
       cursor: pointer;
     }
+
     .btn:hover {
       background-color: #0056b3;
     }
+
     input {
       padding: 4px;
       font-size: 14px;
@@ -47,6 +54,7 @@
     }
   </style>
 </head>
+
 <body>
   <h2>Notebook com Variáveis ao Vivo</h2>
   <div id="cells"></div>
@@ -56,50 +64,66 @@
     const variables = {};
     const variableInputs = {}; // mantém referência aos inputs
 
-    function addCell() {
-  const container = document.createElement('div');
-  container.className = 'cell';
-
-  const textarea = document.createElement('textarea');
-  const execBtn = document.createElement('button');
-  const copyBtn = document.createElement('button');
-  const renderBtn = document.createElement('button');
-  const output = document.createElement('div');
-
-  execBtn.className = renderBtn.className = copyBtn.className = 'btn';
-  execBtn.textContent = 'Executar';
-  renderBtn.textContent = 'Renderizar';
-  copyBtn.textContent = 'Copiar';
-
-  output.className = 'output';
-
-  execBtn.onclick = () => {
-    const raw = textarea.value;
-    output.textContent = parseText(raw);
-  };
-
-  copyBtn.onclick = () => {
-    const text = output.textContent;
-    if (text) {
-      navigator.clipboard.writeText(text)
-        .then(() => alert('Texto copiado!'))
-        .catch(err => alert('Erro ao copiar: ' + err));
+    function abrirChatGPTComTexto(texto) {
+      const url = `https://chat.openai.com/?model=gpt-4&q=${encodeURIComponent(texto)}`;
+      window.open(url, '_blank');
     }
-  };
 
-  renderBtn.onclick = () => {
-    const raw = textarea.value;
-    output.innerHTML = ''; // Limpa
-    output.appendChild(parseHTML(raw)); // Insere os elementos reais
-  };
 
-  container.appendChild(textarea);
-  container.appendChild(execBtn);
-  container.appendChild(copyBtn);
-  container.appendChild(renderBtn);
-  container.appendChild(output);
-  document.getElementById('cells').appendChild(container);
-}
+    function addCell() {
+      const container = document.createElement('div');
+      container.className = 'cell';
+
+      const textarea = document.createElement('textarea');
+      const execBtn = document.createElement('button');
+      const copyBtn = document.createElement('button');
+      const renderBtn = document.createElement('button');
+      const gptBtn = document.createElement('button');
+      const output = document.createElement('div');
+
+      execBtn.className = renderBtn.className = copyBtn.className = 'btn';
+      execBtn.textContent = 'Executar';
+      renderBtn.textContent = 'Renderizar';
+      copyBtn.textContent = 'Copiar';
+      gptBtn.textContent = 'GPT';
+
+
+      output.className = 'output';
+
+      execBtn.onclick = () => {
+        const raw = textarea.value;
+        output.textContent = parseText(raw);
+      };
+
+      copyBtn.onclick = () => {
+        const text = output.textContent;
+        if (text) {
+          navigator.clipboard.writeText(text)
+            .then(() => alert('Texto copiado!'))
+            .catch(err => alert('Erro ao copiar: ' + err));
+        }
+      };
+
+      gptBtn.onclick = () => {
+        const text = output.textContent;
+        if (text) {
+          abrirChatGPTComTexto(text)
+        }
+      };
+
+      renderBtn.onclick = () => {
+        const raw = textarea.value;
+        output.innerHTML = ''; // Limpa
+        output.appendChild(parseHTML(raw)); // Insere os elementos reais
+      };
+
+      container.appendChild(textarea);
+      container.appendChild(execBtn);
+      container.appendChild(copyBtn);
+      container.appendChild(renderBtn);
+      container.appendChild(output);
+      document.getElementById('cells').appendChild(container);
+    }
 
     function parseText(text) {
       return text.replace(/@(\w+)/g, (_, varName) => {
@@ -108,41 +132,41 @@
     }
 
     function parseHTML(text) {
-  const fragment = document.createDocumentFragment();
+      const fragment = document.createDocumentFragment();
 
-  let lastIndex = 0;
-  const regex = /@(\w+)/g;
-  let match;
+      let lastIndex = 0;
+      const regex = /@(\w+)/g;
+      let match;
 
-  while ((match = regex.exec(text)) !== null) {
-    const varName = match[1];
+      while ((match = regex.exec(text)) !== null) {
+        const varName = match[1];
 
-    // Adiciona o texto antes do @variavel
-    fragment.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
+        // Adiciona o texto antes do @variavel
+        fragment.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
 
-    // Cria input se ainda não existir
-    if (!variableInputs[varName]) {
-      const input = document.createElement('input');
-      input.type = 'text';
-      input.placeholder = varName;
-      input.value = variables[varName] ?? '';
-      input.oninput = () => {
-        variables[varName] = input.value;
-        console.log(varName, input.value);
-        
-      };
-      variableInputs[varName] = input;
+        // Cria input se ainda não existir
+        if (!variableInputs[varName]) {
+          const input = document.createElement('input');
+          input.type = 'text';
+          input.placeholder = varName;
+          input.value = variables[varName] ?? '';
+          input.oninput = () => {
+            variables[varName] = input.value;
+            console.log(varName, input.value);
+
+          };
+          variableInputs[varName] = input;
+        }
+
+        fragment.appendChild(variableInputs[varName]);
+        lastIndex = regex.lastIndex;
+      }
+
+      // Texto restante após última variável
+      fragment.appendChild(document.createTextNode(text.slice(lastIndex)));
+
+      return fragment;
     }
-
-    fragment.appendChild(variableInputs[varName]);
-    lastIndex = regex.lastIndex;
-  }
-
-  // Texto restante após última variável
-  fragment.appendChild(document.createTextNode(text.slice(lastIndex)));
-
-  return fragment;
-}
 
 
 
@@ -160,4 +184,5 @@
     window.onload = addCell;
   </script>
 </body>
+
 </html>
