@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskQuest - Gamificação de Tarefas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .nav-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .nav-btn.active {
+            background: rgba(255,255,255,0.9);
+            color: #333;
+        }
+
+        .screen {
+            display: none;
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .screen.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .screen h2 {
+            color: #5a67d8;
+            margin-bottom: 20px;
+            font-size: 2rem;
+            text-align: center;
+        }
+
+        .points-display {
+            text-align: center;
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(255,215,0,0.3);
+        }
+
+        .points-display h3 {
+            font-size: 1.5rem;
+            color: #b8860b;
+            margin-bottom: 10px;
+        }
+
+        .points-value {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #8b6914;
+        }
+
+        .prizes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .prize-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .prize-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .prize-card h4 {
+            color: #5a67d8;
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+
+        .prize-cost {
+            color: #e53e3e;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .tasks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .task-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .task-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .task-card.completed {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .task-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #5a67d8;
+        }
+
+        .task-card.completed .task-title {
+            color: white;
+        }
+
+        .task-points {
+            background: #5a67d8;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .task-card.completed .task-points {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .task-description {
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #5a67d8;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #4c51bf;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #38a169;
+        }
+
+        .btn-danger {
+            background: #e53e3e;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c53030;
+        }
+
+        .add-section {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .history-timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .history-timeline::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #5a67d8;
+        }
+
+        .history-item {
+            position: relative;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .history-item::before {
+            content: '';
+            position: absolute;
+            left: -22px;
+            top: 20px;
+            width: 12px;
+            height: 12px;
+            background: #5a67d8;
+            border-radius: 50%;
+            border: 3px solid white;
+        }
+
+        .history-date {
+            font-weight: bold;
+            color: #5a67d8;
+            margin-bottom: 10px;
+        }
+
+        .history-details {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #5a67d8;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .progress-bar {
+            background: #e2e8f0;
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #48bb78, #38a169);
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎮 TaskQuest</h1>
+            <p>Transforme suas tarefas em uma aventura!</p>
+        </div>
+
+        <div class="nav-buttons">
+            <button class="nav-btn active" onclick="showScreen('prizes')">🏆 Prêmios</button>
+            <button class="nav-btn" onclick="showScreen('tasks')">📋 Tarefas</button>
+            <button class="nav-btn" onclick="showScreen('history')">📈 Histórico</button>
+        </div>
+
+        <!-- Tela de Prêmios -->
+        <div id="prizes" class="screen active">
+            <h2>🏆 Loja de Prêmios</h2>
+            
+            <div class="points-display">
+                <h3>💰 Seus Pontos</h3>
+                <div class="points-value" id="totalPoints">1250</div>
+            </div>
+
+            <div class="prizes-grid">
+                <div class="prize-card">
+                    <h4>🍕 Pizza Favorita</h4>
+                    <p>Peça uma pizza deliciosa da sua pizzaria favorita!</p>
+                    <div class="prize-cost">500 pontos</div>
+                    <button class="btn btn-primary" onclick="redeemPrize('Pizza', 500)">Resgatar</button>
+                </div>
+
+                <div class="prize-card">
+                    <h4>🎬 Sessão de Cinema</h4>
+                    <p>Assista a um filme no cinema com pipoca e refrigerante.</p>
+                    <div class="prize-cost">800 pontos</div>
+                    <button class="btn btn-primary" onclick="redeemPrize('Cinema', 800)">Resgatar</button>
+                </div>
+
+                <div class="prize-card">
+                    <h4>👕 Peça de Roupa</h4>
+                    <p>Compre aquela peça de roupa que você estava querendo.</p>
+                    <div class="prize-cost">1000 pontos</div>
+                    <button class="btn btn-primary" onclick="redeemPrize('Roupa', 1000)">Resgatar</button>
+                </div>
+
+                <div class="prize-card">
+                    <h4>🎮 Jogo Novo</h4>
+                    <p>Compre um novo jogo que você estava esperando.</p>
+                    <div class="prize-cost">1500 pontos</div>
+                    <button class="btn btn-primary" onclick="redeemPrize('Jogo', 1500)">Resgatar</button>
+                </div>
+
+                <div class="prize-card">
+                    <h4>🏖️ Dia de Spa</h4>
+                    <p>Relaxe com uma sessão de spa ou massagem.</p>
+                    <div class="prize-cost">2000 pontos</div>
+                    <button class="btn btn-primary" onclick="redeemPrize('Spa', 2000)">Resgatar</button>
+                </div>
+
+                <div class="prize-card">
+                    <h4>🎒 Viagem de Fim de Semana</h4>
+                    <p>Faça uma viagem curta para um lugar especial.</p>
+                    <div class="prize-cost">3000 pontos</div>
+                    <button class="btn btn-primary" onclick="redeemPrize('Viagem', 3000)">Resgatar</button>
+                </div>
+            </div>
+
+            <div class="add-section">
+                <h3>➕ Adicionar Novo Prêmio</h3>
+                <div class="form-group">
+                    <label>Nome do Prêmio:</label>
+                    <input type="text" id="newPrizeName" placeholder="Ex: Jantar especial">
+                </div>
+                <div class="form-group">
+                    <label>Descrição:</label>
+                    <textarea id="newPrizeDesc" placeholder="Descreva o prêmio..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Custo em Pontos:</label>
+                    <input type="number" id="newPrizeCost" placeholder="Ex: 750">
+                </div>
+                <button class="btn btn-success" onclick="addPrize()">Adicionar Prêmio</button>
+            </div>
+        </div>
+
+        <!-- Tela de Tarefas -->
+        <div id="tasks" class="screen">
+            <h2>📋 Suas Tarefas Diárias</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="completedToday">3</div>
+                    <div class="stat-label">Concluídas Hoje</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="pointsToday">150</div>
+                    <div class="stat-label">Pontos Hoje</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="streakDays">7</div>
+                    <div class="stat-label">Dias Consecutivos</div>
+                </div>
+            </div>
+
+            <div class="tasks-grid" id="tasksContainer">
+                <div class="task-card completed">
+                    <div class="task-header">
+                        <div class="task-title">💧 Beber 2L de água</div>
+                        <div class="task-points">+50 pontos</div>
+                    </div>
+                    <div class="task-description">Mantenha-se hidratado bebendo pelo menos 2 litros de água durante o dia.</div>
+                    <div class="task-actions">
+                        <button class="btn btn-success">✅ Concluída</button>
+                    </div>
+                </div>
+
+                <div class="task-card">
+                    <div class="task-header">
+                        <div class="task-title">🏃 Exercitar-se 30min</div>
+                        <div class="task-points">+100 pontos</div>
+                    </div>
+                    <div class="task-description">Faça pelo menos 30 minutos de exercício físico (caminhada, academia, esporte).</div>
+                    <div class="task-actions">
+                        <button class="btn btn-primary" onclick="completeTask(this, 100)">Concluir</button>
+                        <button class="btn btn-danger" onclick="removeTask(this)">Remover</button>
+                    </div>
+                </div>
+
+                <div class="task-card">
+                    <div class="task-header">
+                        <div class="task-title">📚 Ler 30 páginas</div>
+                        <div class="task-points">+75 pontos</div>
+                    </div>
+                    <div class="task-description">Leia pelo menos 30 páginas de um livro ou artigo interessante.</div>
+                    <div class="task-actions">
+                        <button class="btn btn-primary" onclick="completeTask(this, 75)">Concluir</button>
+                        <button class="btn btn-danger" onclick="removeTask(this)">Remover</button>
+                    </div>
+                </div>
+
+                <div class="task-card">
+                    <div class="task-header">
+                        <div class="task-title">🧘 Meditar 15min</div>
+                        <div class="task-points">+60 pontos</div>
+                    </div>
+                    <div class="task-description">Pratique meditação ou mindfulness por 15 minutos para relaxar a mente.</div>
+                    <div class="task-actions">
+                        <button class="btn btn-primary" onclick="completeTask(this, 60)">Concluir</button>
+                        <button class="btn btn-danger" onclick="removeTask(this)">Remover</button>
+                    </div>
+                </div>
+
+                <div class="task-card">
+                    <div class="task-header">
+                        <div class="task-title">🏠 Organizar um cômodo</div>
+                        <div class="task-points">+80 pontos</div>
+                    </div>
+                    <div class="task-description">Organize completamente um cômodo da casa (quarto, sala, cozinha).</div>
+                    <div class="task-actions">
+                        <button class="btn btn-primary" onclick="completeTask(this, 80)">Concluir</button>
+                        <button class="btn btn-danger" onclick="removeTask(this)">Remover</button>
+                    </div>
+                </div>
+
+                <div class="task-card">
+                    <div class="task-header">
+                        <div class="task-title">📱 Sem redes sociais 2h</div>
+                        <div class="task-points">+90 pontos</div>
+                    </div>
+                    <div class="task-description">Fique pelo menos 2 horas sem usar redes sociais durante o dia.</div>
+                    <div class="task-actions">
+                        <button class="btn btn-primary" onclick="completeTask(this, 90)">Concluir</button>
+                        <button class="btn btn-danger" onclick="removeTask(this)">Remover</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="add-section">
+                <h3>➕ Adicionar Nova Tarefa</h3>
+                <div class="form-group">
+                    <label>Título da Tarefa:</label>
+                    <input type="text" id="newTaskTitle" placeholder="Ex: Estudar programação">
+                </div>
+                <div class="form-group">
+                    <label>Descrição:</label>
+                    <textarea id="newTaskDesc" placeholder="Descreva a tarefa..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Pontos de Recompensa:</label>
+                    <input type="number" id="newTaskPoints" placeholder="Ex: 50">
+                </div>
+                <button class="btn btn-success" onclick="addTask()">Adicionar Tarefa</button>
+            </div>
+        </div>
+
+        <!-- Tela de Histórico -->
+        <div id="history" class="screen">
+            <h2>📈 Histórico de Conquistas</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">47</div>
+                    <div class="stat-label">Tarefas Concluídas</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">2,350</div>
+                    <div class="stat-label">Pontos Ganhos</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">12</div>
+                    <div class="stat-label">Prêmios Resgatados</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">15</div>
+                    <div class="stat-label">Dias Ativos</div>
+                </div>
+            </div>
+
+            <div class="history-timeline" id="historyContainer">
+                <div class="history-item">
+                    <div class="history-date">🗓️ Hoje - 04/07/2025</div>
+                    <div class="history-details">
+                        <strong>✅ Beber 2L de água</strong> - +50 pontos<br>
+                        <strong>✅ Exercitar-se 30min</strong> - +100 pontos<br>
+                        <strong>✅ Meditar 15min</strong> - +60 pontos<br>
+                        <em>Total do dia: 210 pontos</em>
+                    </div>
+                </div>
+
+                <div class="history-item">
+                    <div class="history-date">🗓️ Ontem - 03/07/2025</div>
+                    <div class="history-details">
+                        <strong>✅ Ler 30 páginas</strong> - +75 pontos<br>
+                        <strong>✅ Organizar um cômodo</strong> - +80 pontos<br>
+                        <strong>✅ Sem redes sociais 2h</strong> - +90 pontos<br>
+                        <strong>🏆 Resgatou: Pizza Favorita</strong> - -500 pontos<br>
+                        <em>Total do dia: 245 pontos</em>
+                    </div>
+                </div>
+
+                <div class="history-item">
+                    <div class="history-date">🗓️ 02/07/2025</div>
+                    <div class="history-details">
+                        <strong>✅ Beber 2L de água</strong> - +50 pontos<br>
+                        <strong>✅ Exercitar-se 30min</strong> - +100 pontos<br>
+                        <strong>✅ Estudar programação</strong> - +120 pontos<br>
+                        <em>Total do dia: 270 pontos</em>
+                    </div>
+                </div>
+
+                <div class="history-item">
+                    <div class="history-date">🗓️ 01/07/2025</div>
+                    <div class="history-details">
+                        <strong>✅ Meditar 15min</strong> - +60 pontos<br>
+                        <strong>✅ Organizar um cômodo</strong> - +80 pontos<br>
+                        <strong>✅ Sem redes sociais 2h</strong> - +90 pontos<br>
+                        <strong>🏆 Resgatou: Sessão de Cinema</strong> - -800 pontos<br>
+                        <em>Total do dia: 230 pontos</em>
+                    </div>
+                </div>
+
+                <div class="history-item">
+                    <div class="history-date">🗓️ 30/06/2025</div>
+                    <div class="history-details">
+                        <strong>✅ Beber 2L de água</strong> - +50 pontos<br>
+                        <strong>✅ Ler 30 páginas</strong> - +75 pontos<br>
+                        <strong>✅ Exercitar-se 30min</strong> - +100 pontos<br>
+                        <strong>✅ Cozinhar refeição saudável</strong> - +85 pontos<br>
+                        <em>Total do dia: 310 pontos</em>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let totalPoints = 1250;
+        let completedToday = 3;
+        let pointsToday = 150;
+
+        function showScreen(screenId) {
+            // Remove active class from all screens and buttons
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Add active class to selected screen and button
+            document.getElementById(screenId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function completeTask(button, points) {
+            const taskCard = button.closest('.task-card');
+            taskCard.classList.add('completed');
+            
+            // Update button
+            button.textContent = '✅ Concluída';
+            button.classList.remove('btn-primary');
+            button.classList.add('btn-success');
+            button.onclick = null;
+            
+            // Remove other buttons
+            const dangerBtn = taskCard.querySelector('.btn-danger');
+            if (dangerBtn) {
+                dangerBtn.remove();
+            }
+            
+            // Update points
+            totalPoints += points;
+            pointsToday += points;
+            completedToday += 1;
+            
+            updateStats();
+            
+            // Add to history
+            const taskTitle = taskCard.querySelector('.task-title').textContent;
+            addToHistory(taskTitle, points);
+            
+            // Show completion animation
+            showCompletionAnimation(points);
+        }
+
+        function removeTask(button) {
+            if (confirm('Tem certeza que deseja remover esta tarefa?')) {
+                const taskCard = button.closest('.task-card');
+                taskCard.style.animation = 'fadeOut 0.5s ease';
+                setTimeout(() => {
+                    taskCard.remove();
+                }, 500);
+            }
+        }
+
+        function addTask() {
+            const title = document.getElementById('newTaskTitle').value;
+            const desc = document.getElementById('newTaskDesc').value;
+            const points = parseInt(document.getElementById('newTaskPoints').value);
+            
+            if (!title || !desc || !points) {
+                alert('Por favor, preencha todos os campos!');
+                return;
+            }
+            
+            const tasksContainer = document.getElementById('tasksContainer');
+            const taskCard = document.createElement('div');
+            taskCard.className = 'task-card';
+            taskCard.innerHTML = `
+                <div class="task-header">
+                    <div class="task-title">${title}</div>
+                    <div class="task-points">+${points} pontos</div>
+                </div>
+                <div class="task-description">${desc}</div>
+                <div class="task-actions">
+                    <button class="btn btn-primary" onclick="completeTask(this, ${points})">Concluir</button>
+                    <button class="btn btn-danger" onclick="removeTask(this)">Remover</button>
+                </div>
+            `;
+            
+            tasksContainer.appendChild(taskCard);
+            
+            // Clear form
+            document.getElementById('newTaskTitle').value = '';
+            document.getElementById('newTaskDesc').value = '';
+            document.getElementById('newTaskPoints').value = '';
+            
+            // Animation
+            taskCard.style.animation = 'fadeIn 0.5s ease';
+        }
+
+        function redeemPrize(prizeName, cost) {
+            if (totalPoints >= cost) {
+                if (confirm(`Deseja resgatar ${prizeName} por ${cost} pontos?`)) {
+                    totalPoints -= cost;
+                    updateStats();
+                    addToHistory(`🏆 Resgatou: ${prizeName}`, -cost);
+                    alert(`Parabéns! Você resgatou: ${prizeName}`);
+                }
+            } else {
+                alert('Pontos insuficientes!');
+            }
+        }
+
+        function addPrize() {
+            const name = document.getElementById('newPrizeName').value;
+            const desc = document.getElementById('newPrizeDesc').value;
+            const cost = parseInt(document.getElementById('newPrizeCost').value);
+            
+            if (!name || !desc || !cost) {
+                alert('Por favor, preencha todos os campos!');
+                return;
+            }
+            
+            const prizesGrid = document.querySelector('.prizes-grid');
+            const prizeCard = document.createElement('div');
+            prizeCard.className = 'prize-card';
+            prizeCard.innerHTML = `
+                <h4>${name}</h4>
+                <p>${desc}</p>
+                <div class="prize-cost">${cost} pontos</div>
+                <button class="btn btn-primary" onclick="redeemPrize('${name}', ${cost})">Resgatar</button>
+            `;
+            
+            prizesGrid.appendChild(prizeCard);
+            
+            // Clear form
+            document.getElementById('newPrizeName').value = '';
+            document.getElementById('newPrizeDesc').value = '';
+            document.getElementById('newPrizeCost').value = '';
+            
+            // Animation
+            prizeCard.style.animation = 'fadeIn 0.5s ease';
+        }
+
+        function updateStats() {
+            document.getElementById('totalPoints').textContent = totalPoints;
+            document.getElementById('completedToday').textContent = completedToday;
+            document.getElementById('pointsToday').textContent = pointsToday;
+        }
+
+        function addToHistory(taskTitle, points) {
+            const historyContainer = document.getElementById('historyContainer');
+            const today = new Date().toLocaleDateString('pt-BR');
+            
+            // Check if there's already an entry for today
+            let todayEntry = historyContainer.querySelector('.history-item');
+            if (!todayEntry || !todayEntry.querySelector('.history-date').textContent.includes(today)) {
+                // Create new entry for today
+                todayEntry = document.createElement('div');
+                todayEntry.className = 'history-item';
+                todayEntry.innerHTML = `
+                    <div class="history-date">🗓️ Hoje - ${today}</div>
+                    <div class="history-details">
+                        <em>Total do dia: 0 pontos</em>
+                    </div>
+                `;
+                historyContainer.insertBefore(todayEntry, historyContainer.firstChild);
+            }
+            
+            // Add new task to today's entry
+            const details = todayEntry.querySelector('.history-details');
+            const totalText = details.querySelector('em');
+            const currentTotal = parseInt(totalText.textContent.match(/\d+/)[0]) || 0;
+            const newTotal = currentTotal + points;
+            
+            const newTask = document.createElement('div');
+            newTask.innerHTML = `<strong>${taskTitle}</strong> - ${points > 0 ? '+' : ''}${points} pontos<br>`;
+            
+            details.insertBefore(newTask, totalText);
+            totalText.textContent = `Total do dia: ${newTotal} pontos`;
+        }
+
+        function showCompletionAnimation(points) {
+            const animation = document.createElement('div');
+            animation.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: linear-gradient(135deg, #48bb78, #38a169);
+                color: white;
+                padding: 20px 40px;
+                border-radius: 15px;
+                font-size: 1.5rem;
+                font-weight: bold;
+                z-index: 1000;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                animation: bounceIn 0.6s ease;
+            `;
+            animation.textContent = `+${points} pontos! 🎉`;
+            
+            document.body.appendChild(animation);
+            
+            setTimeout(() => {
+                animation.style.animation = 'fadeOut 0.5s ease';
+                setTimeout(() => {
+                    document.body.removeChild(animation);
+                }, 500);
+            }, 2000);
+        }
+
+        // Add CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes bounceIn {
+                0% {
+                    transform: translate(-50%, -50%) scale(0.3);
+                    opacity: 0;
+                }
+                50% {
+                    transform: translate(-50%, -50%) scale(1.05);
+                }
+                70% {
+                    transform: translate(-50%, -50%) scale(0.9);
+                }
+                100% {
+                    transform: translate(-50%, -50%) scale(1);
+                    opacity: 1;
+                }
+            }
+            
+            @keyframes fadeOut {
+                from {
+                    opacity: 1;
+                    transform: translate(-50%, -50%) scale(1);
+                }
+                to {
+                    opacity: 0;
+                    transform: translate(-50%, -50%) scale(0.8);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Initialize the app
+        window.onload = function() {
+            updateStats();
+        };
+    </script>
+</body>
+</html>
