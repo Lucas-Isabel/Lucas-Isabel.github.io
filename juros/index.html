@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Calculadora de Aporte Mensal</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 30px;
+      max-width: 600px;
+      margin: auto;
+    }
+    input, select, button {
+      padding: 10px;
+      margin-top: 8px;
+      margin-bottom: 20px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    label {
+      font-weight: bold;
+    }
+    .error {
+      color: red;
+    }
+    .resultado {
+      font-size: 1.2em;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Calculadora de Aporte Mensal</h1>
+
+  <label for="valorFinal">Valor desejado (R$):</label>
+  <input type="number" id="valorFinal" step="0.01" placeholder="Ex: 1000000">
+
+  <label for="valorInicial">Valor inicial (R$):</label>
+  <input type="number" id="valorInicial" step="0.01" placeholder="Ex: 0">
+
+  <label for="taxa">Taxa de juros anual (%):</label>
+  <input type="number" id="taxa" step="0.01" placeholder="Ex: 8">
+
+  <label for="anos">Período (anos):</label>
+  <input type="number" id="anos" placeholder="Ex: 21">
+
+  <button onclick="calcular()">Calcular</button>
+
+  <div class="error" id="erro"></div>
+  <div class="resultado" id="resultado"></div>
+
+  <script>
+    function calcular() {
+      const valorFinal = parseFloat(document.getElementById("valorFinal").value);
+      const valorInicial = parseFloat(document.getElementById("valorInicial").value);
+      const taxaAnual = parseFloat(document.getElementById("taxa").value);
+      const anos = parseInt(document.getElementById("anos").value);
+
+      const erroDiv = document.getElementById("erro");
+      const resultadoDiv = document.getElementById("resultado");
+      erroDiv.textContent = '';
+      resultadoDiv.textContent = '';
+
+      // Validação
+      if (isNaN(valorFinal) || isNaN(valorInicial) || isNaN(taxaAnual) || isNaN(anos)) {
+        erroDiv.textContent = "Todos os campos devem ser preenchidos corretamente.";
+        return;
+      }
+      if (valorFinal <= 0 || taxaAnual <= 0 || anos <= 0) {
+        erroDiv.textContent = "Os valores devem ser maiores que zero.";
+        return;
+      }
+      if (valorInicial >= valorFinal) {
+        erroDiv.textContent = "O valor desejado deve ser maior que o valor inicial.";
+        return;
+      }
+
+      // Cálculo
+      const meses = anos * 12;
+      const taxaMensal = Math.pow(1 + taxaAnual / 100, 1 / 12) - 1;
+
+      const montanteSemAporte = valorInicial * Math.pow(1 + taxaMensal, meses);
+      const restante = valorFinal - montanteSemAporte;
+
+      if (restante <= 0) {
+        resultadoDiv.textContent = "Você já alcançará o valor desejado apenas com os juros sobre o valor inicial.";
+        return;
+      }
+
+      const aporteMensal = restante * taxaMensal / (Math.pow(1 + taxaMensal, meses) - 1);
+
+      resultadoDiv.textContent = `Você precisará aportar R$ ${aporteMensal.toFixed(2)} por mês para alcançar R$ ${valorFinal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} em ${anos} anos.`;
+    }
+  </script>
+
+</body>
+</html>
