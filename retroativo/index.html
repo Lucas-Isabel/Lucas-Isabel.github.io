@@ -8,7 +8,7 @@
     table { border-collapse: collapse; width: 100%; margin-top: 20px; }
     th, td { border: 1px solid #ccc; padding: 8px; text-align: right; }
     th { background-color: #f4f4f4; }
-    input { width: 100px; margin-right: 10px; }
+    input { width: 200px; margin-right: 10px; }
     label { margin-right: 5px; }
 </style>
 </head>
@@ -16,13 +16,16 @@
 <h2>Simulação de Rendimentos</h2>
 
 <div>
-    <label>Valor Inicial: R$</label><input type="number" id="valorInicial" value="1000"><br><br>
-    <label>Valor Retirado/Mês: R$</label><input type="number" id="valorRetirado" value="100"><br><br>
+    <label>Valor Inicial: R$</label><input type="number" id="valorInicial" value="500"><br><br>
+    <label>Valor Retirado/Mês: R$</label><input type="number" id="valorRetirado" value="41.67"><br><br>
     <label>SELIC (% a.a.):</label><input type="number" id="selic" value="12"><br><br>
     <label>CDI Cliente (%):</label><input type="number" id="cdiCliente" value="105"><br><br>
     <label>CDI Meu (%):</label><input type="number" id="cdiMeu" value="115"><br><br>
+    <label>Novos usuários nos meses (separados por vírgula):</label>
+    <input type="text" id="addNewUsers" value="4,5,11"><br><br>
     <button onclick="gerarTabela()">Gerar Tabela</button>
 </div>
+
 
 <table id="tabelaResultado">
     <thead>
@@ -36,11 +39,11 @@
             <th>Saldo Final</th>
         </tr>
     </thead>
-    <tbody>
-    </tbody>
+    <tbody></tbody>
     <tfoot>
         <tr>
-            <td colspan="2">Soma</td>
+            <td id="cashbackPercentual"></td>
+            <td>Soma</td>
             <td id="somaRendimentoSelic"></td>
             <td id="somaRendimentoCliente"></td>
             <td id="somaSpread"></td>
@@ -53,10 +56,16 @@
 <script>
 function gerarTabela() {
     const valorInicial = parseFloat(document.getElementById('valorInicial').value);
-    const valorRetirado = parseFloat(document.getElementById('valorRetirado').value);
+    let valorRetiradoBase = parseFloat(document.getElementById('valorRetirado').value);
     const selicAnual = parseFloat(document.getElementById('selic').value);
     const cdiCliente = parseFloat(document.getElementById('cdiCliente').value) / 100;
     const cdiMeu = parseFloat(document.getElementById('cdiMeu').value) / 100;
+
+    // Lê a lista de novos usuários
+    const newUsersInput = document.getElementById('addNewUsers').value;
+    const newUsers = newUsersInput.split(',')
+        .map(n => parseInt(n.trim()))
+        .filter(n => !isNaN(n));
 
     // Converte para rendimento mensal aproximado
     const selicMensal = Math.pow(1 + selicAnual / 100, 1/12) - 1;
@@ -71,13 +80,25 @@ function gerarTabela() {
     let somaRendCliente = 0;
     let somaSpread = 0;
     let somaSaque = 0;
+    let totalUsers = 1; // começa com 1 usuário
 
-    for(let mes = 1; mes <= 12; mes++) {
+    for (let mes = 1; mes <= 12; mes++) {
+        let saldoDescricao = saldo.toFixed(2);
+
+        // Se entra novo usuário nesse mês
+        if (newUsers.includes(mes)) {
+            saldoDescricao = `${saldo.toFixed(2)} + ${valorInicial.toFixed(2)}`;
+            saldo += valorInicial;        
+            totalUsers++;                 
+        }
+
+        // saque proporcional à quantidade de usuários
+        let valorRetirado = valorRetiradoBase * totalUsers;
+
         const rendSelic = saldo * rendMeuMensal;
         const rendCliente = saldo * rendClienteMensal;
         const lucroSpread = rendSelic - rendCliente;
-
-        const saldoFinal = saldo + rendSelic - valorRetirado;
+        let saldoFinal = saldo - valorRetirado;
 
         somaRendSelic += rendSelic;
         somaRendCliente += rendCliente;
@@ -87,15 +108,15 @@ function gerarTabela() {
         const tr = document.createElement("tr");
         tr.innerHTML = `
             <td>${mes}</td>
-            <td>${saldo.toFixed(2)}</td>
+            <td>${saldoDescricao}</td>
             <td>${rendSelic.toFixed(2)}</td>
             <td>${rendCliente.toFixed(2)}</td>
             <td>${lucroSpread.toFixed(2)}</td>
             <td>${valorRetirado.toFixed(2)}</td>
             <td>${saldoFinal.toFixed(2)}</td>
         `;
-        tbody.appendChild(tr);
 
+        tbody.appendChild(tr);
         saldo = saldoFinal;
     }
 
@@ -104,6 +125,7 @@ function gerarTabela() {
     document.getElementById("somaSpread").textContent = somaSpread.toFixed(2);
     document.getElementById("somaSaque").textContent = somaSaque.toFixed(2);
     document.getElementById("saldoResidual").textContent = saldo.toFixed(2);
+    document.getElementById("cashbackPercentual").textContent = `${((somaRendCliente / valorInicial) * 100).toFixed(3)}%`;
 }
 </script>
 </body>
